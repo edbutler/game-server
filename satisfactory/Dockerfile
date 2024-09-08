@@ -9,8 +9,8 @@ ARG PGID=847
 RUN mkdir -p /satisfactory
 
 RUN set -euxo pipefail \
-    && mkdir -p /satisfactory/.config/Epic/FactoryGame \
-    && ln -s /satisfactory/data
+    && mkdir -p /satisfactory/.config/Epic \
+    && ln -s /satisfactory/data /satisfactory/.config/Epic/FactoryGame
 
 RUN set -euxo pipefail \
     && groupadd --system --gid "$PGID" "$GROUP" \
