@@ -3,9 +3,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    ports:
-     - 15777:15777/udp
-     - 15000:15000/udp
-     - 7777:7777/udp
+    network_mode: host
     volumes:
      - /data/satisfactory:/satisfactory/data

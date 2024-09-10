@@ -1,5 +1,5 @@
 
-FROM steamcmd/steamcmd:ubuntu-24
+FROM steamcmd/steamcmd:ubuntu-18
 
 ARG USER=satisfactory
 ARG GROUP=satisfactory
@@ -9,32 +9,28 @@ ARG PGID=847
 RUN mkdir -p /satisfactory
 
 RUN set -euxo pipefail \
-    && mkdir -p /satisfactory/.config/Epic \
-    && ln -s /satisfactory/data /satisfactory/.config/Epic/FactoryGame
-
-RUN set -euxo pipefail \
     && groupadd --system --gid "$PGID" "$GROUP" \
     && useradd --system --uid "$PUID" --gid "$PGID" --home-dir /satisfactory --shell /bin/sh "$USER" \
     && chown -R $USER:$GROUP /satisfactory
 
+USER satisfactory:satisfactory
+ENV HOME=/satisfactory
+
+RUN set -euxo pipefail \
+    && mkdir -p /satisfactory/.config/Epic \
+    && ln -s /satisfactory/data /satisfactory/.config/Epic/FactoryGame
+
 RUN steamcmd +force_install_dir /satisfactory/server +login anonymous +app_update 1690800 +quit
 
-# this is janky af but chowning the entire directory doubles the size of the image if cached...
 RUN set -euxo pipefail \
-    && mkdir -p /satisfactory/server/FactoryGame/Saved \
-    && mkdir -p /satisfactory/server/Engine/Saved \
-    && mkdir -p /satisfactory/server/FactoryGame/Intermediate \
-    && chown $USER:$GROUP /satisfactory/server /satisfactory/server/FactoryGame/Saved /satisfactory/server/Engine/Saved /satisfactory/server/FactoryGame/Intermediate
+    && mkdir -p /satisfactory/server/FactoryGame/Saved/Config/LinuxServer/ \
+    && echo -e "[/Script/Engine.GameSession]\nMaxPlayers=8" >> /satisfactory/server/FactoryGame/Saved/Config/LinuxServer/Game.ini
 
 COPY src/run.sh /satisfactory
 
 VOLUME /satisfactory/data
 
-USER satisfactory:satisfactory
-ENV HOME=/satisfactory
-
-EXPOSE 15777/udp
-EXPOSE 15000/udp
+EXPOSE 7777/tcp
 EXPOSE 7777/udp
 
 WORKDIR /satisfactory
